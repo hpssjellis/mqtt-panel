@@ -3,7 +3,7 @@
 
 March 2022
 
-https://hpssjellis.github.io/mqtt-panel/index.html
+https://hpssjellis.github.io/mqtt-panel/index2.html
 
 A simple web interface which is able to subscribe to a MQTT topic and display
 the information.
