@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A web interface for MQTT over Websockets">
+    <meta name="author" content="Fabian Affolter">
+
+    <title>Home conditions</title>
+<!--
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+  -->
+  
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.js"></script>
+<script>
+  
+let host = 'localhost';
+let port = 1883;
+let username = "fred";
+let topic = '#';
+let useTLS = false;
+let cleansession = true;
+let reconnectTimeout = 3000;
+let tempData = new Array();
+let mqtt;
+
+function MQTTconnect() {
+    if (typeof path == "undefined") {
+        path = '/';
+    }
+    mqtt = new Paho.MQTT.Client(host, port, path, "mqtt_panel" + parseInt(Math.random() * 100, 10));
+    let options = {
+        timeout: 3,
+        useSSL: useTLS,
+        cleanSession: cleansession,
+        onSuccess: onConnect,
+        onFailure: function (message) {
+            $('#status').html("Connection failed: " + message.errorMessage + "Retrying...")
+                .attr('class', 'alert alert-danger');
+            setTimeout(MQTTconnect, reconnectTimeout);
+        }
+    };
+
+    mqtt.onConnectionLost = onConnectionLost;
+    mqtt.onMessageArrived = onMessageArrived;
+    console.log("Host: " + host + ", Port: " + port + ", Path: " + path + " TLS: " + useTLS);
+    mqtt.connect(options);
+};
+
+function onConnect() {
+    $('#status').html('Connected to ' + host + ':' + port + path)
+        .attr('class', 'alert alert-success');
+    mqtt.subscribe(topic, { qos: 0 });
+    $('#topic').html(topic);
+};
+
+function onConnectionLost(response) {
+    setTimeout(MQTTconnect, reconnectTimeout);
+    $('#status').html("Connection lost. Reconnecting...")
+        .attr('class', 'alert alert-warning');
+};
+
+function onMessageArrived(message) {
+    let topic = message.destinationName;
+    let payload = message.payloadString;
+    console.log("Topic: " + topic + ", Message payload: " + payload);
+   
+  
+  /*
+  
+  
+  $('#message').html(topic + ', ' + payload);
+    let topics = topic.split('/');
+    let area = topics[1];
+
+    switch (area) {
+        case 'front':
+            $('#value1').html('(Switch value: ' + payload + ')');
+            if (payload == 'true') {
+                $('#label1').text('Closed');
+                $('#label1').removeClass('badge-danger').addClass('badge-success');
+            } else {
+                $('#label1').text('Open');
+                $('#label1').removeClass('badge-success').addClass('badge-danger');
+            }
+            break;
+        case 'back':
+            $('#value2').html('(Switch value: ' + payload + ')');
+            if (payload == 'true') {
+                $('#label2').text('Closed');
+                $('#label2').removeClass('badge-danger').addClass('badge-success');
+            } else {
+                $('#label2').text('Open');
+                $('#label2').removeClass('badge-success').addClass('badge-danger');
+            }
+            break;
+        case 'living':
+            $('#livingTempSensor').html('(Sensor value: ' + payload + ')');
+            $('#livingTempLabel').text(payload + ' °C');
+            $('#livingTempLabel').addClass('badge-default');
+
+            tempData.push({
+                "timestamp": Date().slice(16, 21),
+                "temperature": parseInt(payload)
+            });
+            if (tempData.length >= 10) {
+                tempData.shift()
+            }
+            drawChart(tempData);
+
+            break;
+        case 'basement':
+            $('#basementTempSensor').html('(Sensor value: ' + payload + ')');
+            if (payload >= 25) {
+                $('#basementTempLabel').text(payload + ' °C - too hot');
+                $('#basementTempLabel').removeClass('badge-warning badge-success badge-info badge-primary').addClass('badge-danger');
+            } else if (payload >= 21) {
+                $('#basementTempLabel').text(payload + ' °C - hot');
+                $('#basementTempLabel').removeClass('badge-danger badge-success badge-info badge-primary').addClass('badge-warning');
+            } else if (payload >= 18) {
+                $('#basementTempLabel').text(payload + ' °C - normal');
+                $('#basementTempLabel').removeClass('badge-danger badge-warning badge-info badge-primary').addClass('badge-success');
+            } else if (payload >= 15) {
+                $('#basementTempLabel').text(payload + ' °C - low');
+                $('#basementTempLabel').removeClass('badge-danger badge-warning badge-success badge-primary').addClass('badge-info');
+            } else if (mpayload <= 12) {
+                $('#basementTempLabel').text(payload + ' °C - too low');
+                $('#basementTempLabel').removeClass('badge-danger badge-warning badge-success badge-info').addClass('badge-primary');
+                basementTemp.push(parseInt(payload));
+                if (basementTemp.length >= 20) {
+                    basementTemp.shift()
+                }
+            }
+            break;
+        default:
+            console.log('Error: Data do not match the MQTT topic.');
+            break;
+        
+     }       
+        
+        */
+
+};
+
+
+  
+  
+</script>
+
+</head>
+<body>
+  
+  <h6>Version 0.0.5-5</h6>
+
+
+<script>
+async function myRun() {  
+let response = await fetch(document.getElementById('myURL').value, {method:'GET', 
+headers: {'Authorization': 'Basic ' + btoa(document.getElementById('myCode').value)}});
+let data = await response.json();
+console.log(data);
+}  
+</script>
+
+
+<input id="myURL" type=text value='https://industrial.api.ubidots.com/api/v2.0/devices/portenta5/temp' size=70><br>
+<input id="myCode" type=text value='authenticate' size=70><br>
+<input id="myTopic" type=text value='topic' size=70><br>
+
+
+
+<input type=button value=go onclick="myRun()">
+  
+<input type=button value=go onclick="{
+                                     
+ host = document.getElementById('myURL').value;
+ username = document.getElementById('myCode').value    
+ username = document.getElementById('myTopic').value                                   
+ MQTTconnect();
+                                     
+ }">
+  
+  
+  
+  <!--
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-2">
+        <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">Home conditions</a>
+    </nav>
+    <div class="container-fluid">
+        <div id="status" class="alert">
+            <small>Loading...</small>
+        </div>
+        <div class="card mb-2">
+            <div class="row">
+                <div class="col-6 col-md-4">
+                    <div class="card-body">
+                        <div class="card-title">
+                            Entrance
+                        </div>
+                        <span id="label1" class="badge w-100">Unknown</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="card-body">
+                        <div class="card-title">
+                            Back door
+                        </div>
+                        <span id="label2" class="badge w-100">Unknown</span>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="card-body">
+                        <div class="card-title">
+                            Basement temperature
+                        </div>
+                        <span id="basementTempLabel" class="badge w-100">Unknown</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-7 mb-2">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title">
+                            Living room temperature
+                            <span id="livingTempLabel" class="text-muted float-right badge">Unknown</span>
+                        </div>
+                    </div>
+                    <canvas id="tempChart" width="300" height="120"></canvas>
+                </div>
+            </div>
+            <div class="col-12 col-md-5">
+                <table class="table table-bordered table-sm table-striped mt-2">                    
+                    <tbody>
+                        <tr>
+                            <th>Entrance</th>
+                            <td><small id="value1">(no value received)</small></td>
+                        </tr>
+                        <tr>
+                            <th>Back door</th>
+                            <td><small id="value2">(no value received)</small></td>
+                        </tr>
+                        <tr>
+                            <th>Basement temperature</th>
+                            <td><small id="basementTempLabel">(no value received)</small></td>
+                        </tr>
+                        <tr>
+                            <th>Living room temperature</th>
+                            <td><small id="livingTempSensor">(no value received)</small></td>
+                        </tr>
+                        <tr>
+                            <th>Last MQTT message</th>
+                            <td><small id="message">no message recieved</small></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <hr>
+        <footer class="text-center mt-10">
+            <small>
+                <a href="https://github.com/fabaff/mqtt-panel">forked from github.com/fabaff/mqtt-panel</a>
+            </small>
+        </footer>
+    </div>
+  
+  
+  
+  -->
+</body>
+</html>
